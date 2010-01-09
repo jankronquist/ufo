@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+      <groupId>tinkerway.ufo.poms</groupId>
+      <artifactId>ufo-poms-scala</artifactId>
+      <version>1.0-SNAPSHOT</version>
+  </parent>
+  <name>Ufo Client Core</name>
+  <groupId>tinkerway.ufo.game</groupId>
+  <artifactId>ufo-game-simple</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>tinkerway.ufo.server</groupId>
+            <artifactId>ufo-server-core</artifactId>
+            <version>${version}</version>
+        </dependency>
+        <dependency>
+            <groupId>tinkerway.ufo.client</groupId>
+            <artifactId>ufo-client-core</artifactId>
+            <version>${version}</version>
+        </dependency>
+        <dependency>
+            <groupId>slick</groupId>
+            <artifactId>slick</artifactId>
+            <version>270</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-native</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-native</artifactId>
+            <version>2.1.0</version>
+            <classifier>mac</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-test</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-util</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl_fmod3</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl_devil</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+        -->
+    </dependencies>
+    <repositories>
+        <repository>
+            <id>slick-repo</id>
+            <name>Slick Maven2 Repository</name>
+            <url>http://slick.cokeandcode.com/mavenrepo</url>
+        </repository>
+        <repository>
+            <id>bs2-repo</id>
+            <name>b2s Maven2 Repository</name>
+            <url>http://b2s-repo.googlecode.com/svn/trunk/mvn-repo/</url>
+        </repository>
+    </repositories>
+</project>
