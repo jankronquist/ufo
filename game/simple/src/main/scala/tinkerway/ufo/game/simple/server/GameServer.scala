@@ -2,9 +2,9 @@ package tinkerway.ufo.game.simple.server
 
 
 
-import api._
-import domain.Domain.{HealingPotion, HumanBeing}
-import ufo.server._
+import tinkerway.ufo.api._
+import tinkerway.ufo.game.simple.domain.Domain.{HealingPotion, HumanBeing}
+import tinkerway.ufo.server._
 
 trait ServerHealingPotion extends HealingPotion with Usable {
   def use(user : ServerBeing, location : Location) = {

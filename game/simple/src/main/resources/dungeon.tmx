@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map SYSTEM "http://mapeditor.org/dtd/1.0/map.dtd">
+<map version="1.0" orientation="orthogonal" width="64" height="64" tilewidth="32" tileheight="32">
+ <tileset name="Dungeon" firstgid="1" tilewidth="32" tileheight="32">
+  <image source="ground/dg_dungeon32.gif"/>
+ </tileset>
+ <layer name="Layer 0" width="64" height="64">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAAO3VQQqDMBRF0d+xUzeljqpk/1spQkujJJ0Wfs6BByKZXARTIqLctrz36CyT5cdarRn79/g2r9WmxvmM/Z8dce0f5fvfv7v+cfu36nlunM/WX993rf9/9vvv7H92NoLSea9/bPoBAAAAAAAAAAAAAACAf3sBqnb1MQBAAAA=
+  </data>
+ </layer>
+ <objectgroup name="Object Group 1" width="0" height="0">
+  <object name="Object" x="32" y="128" width="96" height="128"/>
+ </objectgroup>
+</map>

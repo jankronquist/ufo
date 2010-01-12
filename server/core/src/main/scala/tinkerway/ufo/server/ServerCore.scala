@@ -1,9 +1,9 @@
 package tinkerway.ufo.server
 
 import collection.mutable.HashMap
-import domain.{Item, Being, HasPosition}
-import entity._
+import tinkerway.ufo.entity._
 import tinkerway.ufo.api._
+import tinkerway.ufo.domain.{Alive, Item, Being, HasPosition}
 
 class Client(val clientId : ClientId, val eventListener : EventListener) {
   
@@ -31,6 +31,13 @@ abstract class ServerBeing(entityId : EntityId, initialPosition : Position, var 
   }
 
   private var inventory : List[ServerItem] = Nil
+
+  def assertCanPerformAction() = {
+    state() match {
+      case Alive() => true
+      case _ => throw new ActionException(IllegalAction())
+    }
+  }
 
   def performItemAction(action : ItemActionType, item : ServerItem, location : Location) = action match {
     case Take() => {
@@ -157,7 +164,7 @@ class Server(world : World) extends ServerEntityContainer with ServerConnector {
         nextClient()
       }
       case Move(beingId, position) => {
-        val being = findBeingControlledByClient(beingId)
+        val being = findBeingToPerformAction(beingId)
         if (position.x < 0 || position.y < 0 || position.x >= world.size.x || position.y >= world.size.y) {
           throw new ActionException(IllegalAction())
         }
@@ -169,11 +176,17 @@ class Server(world : World) extends ServerEntityContainer with ServerConnector {
         being.moveTo(position)
       }
       case ItemAction(beingId, action, itemId, location) => {
-        val being = findBeingControlledByClient(beingId)
+        val being = findBeingToPerformAction(beingId)
         being.performItemAction(action, findItem(itemId), location)
       }
     }
-    
+
+    def findBeingToPerformAction(beingId : EntityId) : ServerBeing = {
+      val being = findBeingControlledByClient(beingId)
+      being.assertCanPerformAction()
+      being
+    }
+
     def findBeingControlledByClient(beingId : EntityId) : ServerBeing = {
       val being = findBeing(beingId)
       being.assertControlledBy(client)
@@ -208,7 +221,7 @@ class Server(world : World) extends ServerEntityContainer with ServerConnector {
 
   // this method is only here for testing
   def getClient(clientId : ClientId) = {
-    clients.filter(_.clientId == clientId).head
+    clients.find(_.clientId == clientId).get
   }
 
   val propertyChangeListener = new Object with PropertyChangeListener {

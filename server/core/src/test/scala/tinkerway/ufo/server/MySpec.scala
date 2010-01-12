@@ -1,9 +1,9 @@
 package tinkerway.ufo.server
 
-import api._
-import client.common.{ClassEntityTypeContainer, SimpleClient, ClientEntity}
-import domain.{HasPosition, Human}
-import entity._
+import tinkerway.ufo.api._
+import tinkerway.ufo.client.common.{ClassEntityTypeContainer, SimpleClient, ClientEntity}
+import tinkerway.ufo.domain.{HasPosition, Human}
+import tinkerway.ufo.entity._
 import java.lang.reflect.{Method, InvocationHandler, Proxy}
 import org.junit.Assert._
 import org.junit.{Ignore, Test, Before}
@@ -114,7 +114,8 @@ class MySpecTest {
   }
 }
 
-object ClientEventHandler extends HasPosition {
+object ClientEventHandler extends PropertyContainer with HasPosition {
+
   val entityTypeId : EntityTypeId = null
 
   def init(client : SimpleClient) = {

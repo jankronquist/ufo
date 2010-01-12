@@ -1,13 +1,14 @@
 package tinkerway.ufo.game.simple.client
 
-import api._
+import tinkerway.ufo.api._
 import java.util.concurrent.CountDownLatch
 import collection.jcl.ArrayList
-import domain.Domain._
+import tinkerway.ufo.game.simple.domain.Domain._
 import java.io.File
 import org.newdawn.slick._
-import ufo.client.common._
-import ufo.domain.{Item, HasPosition}
+import tinkerway.ufo.client.common._
+import tinkerway.ufo.domain.{Item, HasPosition}
+
 class TheClientApp(server : ServerConnector) {
 
   val startSignal = new CountDownLatch(1);

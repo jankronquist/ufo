@@ -70,26 +70,26 @@ case class BeginTurn(clientId : ClientId) extends Event
 
 sealed abstract class ItemActionType
 
-case class Take extends ItemActionType
-case class Place extends ItemActionType
-case class Use extends ItemActionType
+case class Take() extends ItemActionType
+case class Place() extends ItemActionType
+case class Use() extends ItemActionType
 
-case class EndTurn extends Action
+case class EndTurn() extends Action
 
 case class Move(beingId : EntityId, position : Position) extends Action
 
 case class ItemAction(beingId : EntityId, action : ItemActionType, itemId : EntityId, location : Location) extends Action
 
-case class BeginGame extends Action
+case class BeginGame() extends Action
 
 // action results
 
-case class Successful extends ActionResult
+case class Successful() extends ActionResult
 
-case class NotYourTurn extends ActionResult
+case class NotYourTurn() extends ActionResult
 
-case class NotInYourControl extends ActionResult
+case class NotInYourControl() extends ActionResult
 
-case class IllegalAction extends ActionResult
+case class IllegalAction() extends ActionResult
 
-case class EntityDoesNotExist extends ActionResult
+case class EntityDoesNotExist() extends ActionResult

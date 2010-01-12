@@ -1,22 +1,35 @@
 package tinkerway.ufo.domain
 
 
-import api._
-import entity.{PropertyContainer, AbstractEntity, Property}
+import tinkerway.ufo.api._
+import tinkerway.ufo.entity.{PropertyContainer, AbstractEntity, Property}
 
-trait HasPosition extends PropertyContainer with MightHavePosition {
+trait HasPosition extends MightHavePosition {
+  this : PropertyContainer =>
   object position extends Property[Position](null)
   def getPosition() : Option[Position] = {
     Some(position())
   }
 }
 
-trait HasHitPoints extends PropertyContainer {
+trait HasHitPoints {
+  this : PropertyContainer =>
   object hitPoints extends Property[Int](0)
 }
 
-trait Being extends HasPosition with HasHitPoints {
-  
+trait HasBeingState {
+  this : PropertyContainer =>
+  object state extends Property[BeingState](Alive())
+}
+
+
+class BeingState
+
+case class Alive() extends BeingState
+
+case class Dead() extends BeingState 
+
+trait Being extends PropertyContainer with HasPosition with HasHitPoints with HasBeingState {
 }
 
 trait Human extends Being with AbstractEntity  {

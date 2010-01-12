@@ -2,13 +2,15 @@ package tinkerway.ufo.client.common
 
 
 
-import api._
-import domain.{HasPosition, Human}
-import entity.Property
+import tinkerway.ufo.api._
+import tinkerway.ufo.domain.{HasPosition, Human}
 import org.junit._
 import Assert._
+import tinkerway.ufo.entity.{PropertyContainer, Property}
 
-trait DummyEventHandler extends HasPosition {
+trait DummyEventHandler {
+  this : PropertyContainer with HasPosition =>
+
   var dummy : Position = null
 
   onChange(position, (from : Position, to : Position) => {
@@ -18,7 +20,7 @@ trait DummyEventHandler extends HasPosition {
 
 }
 
-class ClientHuman extends ClientEntity with Human with DummyEventHandler
+class ClientHuman extends ClientEntity with Human with DummyEventHandler with HasPosition
 
 class PropertyCaptureHandler {
   var result : Any = null

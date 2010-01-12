@@ -1,4 +1,7 @@
 
 TODO:
-* Entity Factory som tar en EntityType och skapar en entitet.. clone med serializable funkar inte... får för mycket kopierat
+* Being ska ha BeingState (Alive, Dead)
+* Entity ska ha id?
+* Action points
+* Pick up items
 
