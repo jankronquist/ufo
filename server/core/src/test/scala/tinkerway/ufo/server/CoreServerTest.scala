@@ -12,7 +12,7 @@ import scala.collection.mutable.HashMap
 
 class ClientHuman extends ClientEntity with Human
 
-class MySpecTest {
+class CoreServerTest {
   val width = 5
   val height = 5
   val server = new Server(new World(Size(width, height)))

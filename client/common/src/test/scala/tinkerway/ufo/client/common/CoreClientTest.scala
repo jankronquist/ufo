@@ -35,7 +35,7 @@ class PropertyCaptureHandler {
   }
 }
 
-class ClientTest {
+class CoreClientTest {
   @Before
   def before() = {
   }
