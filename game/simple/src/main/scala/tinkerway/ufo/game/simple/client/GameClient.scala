@@ -34,13 +34,13 @@ trait Sprite extends GameConstants {
   }
 }
 
-class ClientHumanBeing extends ClientEntity with HumanBeing with Sprite {
+trait ClientHumanBeing extends HumanBeing with Sprite {
   val sx = (Math.random*4).asInstanceOf[Int]
   val sy = (Math.random*4).asInstanceOf[Int]
   val image = GlobalData.beings.getSprite(sx, sy)
 }
 
-class ClientHealingPotion extends ClientEntity with HealingPotion with Sprite {
+trait ClientHealingPotion extends HealingPotion with Sprite {
   val image = GlobalData.misc.getSprite(2, 2)
 }
 
@@ -75,8 +75,8 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
     GlobalData.beings = new SpriteSheet(loadImage("beings/dg_humans32.gif"), tileWidth, tileHeight)
     GlobalData.misc = new SpriteSheet(loadImage("items/dg_misc32.gif"), tileWidth, tileHeight)
     val entityTypes = new FunctionEntityTypeContainer
-    entityTypes.registerEntityType(() => new ClientHumanBeing())
-    entityTypes.registerEntityType(() => new ClientHealingPotion())
+    entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with ClientHumanBeing)
+    entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with ClientHealingPotion)
 //    entityTypes.registerEntityType(classOf[ClientHumanBeing])
 //    entityTypes.registerEntityType(classOf[ClientHealingPotion])
     client = new SimpleClient(entityTypes)
@@ -97,6 +97,8 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
       moveEntity(0, -1)
     } else if(input.isKeyDown(Input.KEY_S)) {
       moveEntity(0, 1)
+    } else if(input.isKeyDown(Input.KEY_J)) {
+      pickUpItem(-1, 0)
     } else if(input.isKeyDown(Input.KEY_SPACE)) {
       var nextBeing : Option[SimpleEntity] = None
       while (nextBeing == None) {
@@ -116,8 +118,15 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
     if (selectedBeing != null) {
       val pos = selectedBeing.entity.asInstanceOf[HasPosition].position()
       val dest = Position(pos.x+xdiff, pos.y+ydiff)
-      val result = actionHandler.perform(new Move(selectedBeing.entityId, dest))
+      val result = actionHandler.perform(new Move(selectedBeing.entity.entityId, dest))
       println(result)
+    }
+  }
+  def pickUpItem(xdiff : Int, ydiff : Int) = {
+    if (selectedBeing != null) {
+      val pos = selectedBeing.entity.asInstanceOf[HasPosition].position()
+      val dest = Position(pos.x+xdiff, pos.y+ydiff)
+      println("pick up item at " + dest)
     }
   }
 

@@ -20,7 +20,7 @@ trait DummyEventHandler {
 
 }
 
-class ClientHuman extends ClientEntity with Human with DummyEventHandler with HasPosition
+trait ClientHuman extends Human with DummyEventHandler with HasPosition
 
 class PropertyCaptureHandler {
   var result : Any = null
@@ -42,11 +42,11 @@ class CoreClientTest {
 
   @Test
   def whenPropertyChangeEventIsCalledThenEventHandlerMethodsShouldBeInvoked() = {
-    val entityTypes = new ClassEntityTypeContainer
-    entityTypes.registerEntityType(classOf[ClientHuman])
+    val entityTypes = new FunctionEntityTypeContainer
+    entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with ClientHuman)
     val client = new SimpleClient(entityTypes)
 
-    val human = new ClientHuman
+    val human = new ClientEntity(EntityId(0)) with ClientHuman
     val globalPositionCapture = new PropertyCaptureHandler()
     globalPositionCapture.register(human.position, client)
 

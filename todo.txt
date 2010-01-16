@@ -1,7 +1,8 @@
 
 TODO:
-* Being ska ha BeingState (Alive, Dead)
-* Entity ska ha id?
-* Action points
 * Pick up items
+* Entity ska ha id?
+* Controlledby Šr en property
+
+* Action points
 

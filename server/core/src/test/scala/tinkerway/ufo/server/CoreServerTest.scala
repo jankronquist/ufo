@@ -1,7 +1,7 @@
 package tinkerway.ufo.server
 
 import tinkerway.ufo.api._
-import tinkerway.ufo.client.common.{ClassEntityTypeContainer, SimpleClient, ClientEntity}
+import tinkerway.ufo.client.common.{FunctionEntityTypeContainer, SimpleClient, ClientEntity}
 import tinkerway.ufo.domain.{HasPosition, Human}
 import tinkerway.ufo.entity._
 import java.lang.reflect.{Method, InvocationHandler, Proxy}
@@ -10,17 +10,17 @@ import org.junit.{Ignore, Test, Before}
 import scala.collection.mutable.HashMap
 
 
-class ClientHuman extends ClientEntity with Human
+trait ClientHuman extends Human
 
 class CoreServerTest {
   val width = 5
   val height = 5
   val server = new Server(new World(Size(width, height)))
-  val entityTypes = new ClassEntityTypeContainer
-  entityTypes.registerEntityType(classOf[ClientHuman])
+  val entityTypes = new FunctionEntityTypeContainer
+  entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with ClientHuman)
   val client = new SimpleClient(entityTypes)
   val actionHandler = server.connect(client)
-  val human = new ClientHuman
+  
   @Before
   def before() = {
     performSuccessful(BeginGame())

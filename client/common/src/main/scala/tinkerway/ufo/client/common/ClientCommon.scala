@@ -1,71 +1,46 @@
 package tinkerway.ufo.client.common
 
 
-import api._
-import entity._
+import tinkerway.ufo.api._
+import tinkerway.ufo.entity._
 import java.io.Serializable
 import java.lang.reflect.Method
 import java.util.Arrays
 import scala.collection.mutable.HashMap
 
-trait ClientEntity extends PropertyContainer with Serializable {
+abstract class ClientEntity(val entityId : EntityId) extends AbstractEntity with Serializable {
   def getProperty(name : String) : Property[Object] = {
     getAllProperties().filter(_.name.equals(name)).first
   }
 
-}
-
-class SimpleEntity(val entity : ClientEntity, val entityId : EntityId, val controlledBy : ClientId, initialProperties : List[PropertyValue], propertyChangeListener : PropertyChangeListener) {
-  private val listener = new CompositePropertyChangeListener()
-  listener.addPropertyChangeListener(propertyChangeListener)
-  initialProperties.foreach(changeProperty(_))
-
   def changeProperty(property : PropertyValue) = {
-    val prop = entity.getProperty(property.name)
+    val prop = getProperty(property.name)
     val old = prop()
-    listener.propertyChange(new PropertyChange[Object](entity, property.name, old, property.value))
+//    propertyChange(new PropertyChange[Object](this, property.name, old, property.value))
 
     prop := property.value
   }
 
-  def getPropertyValue(name : String) : Object = {
-    entity.getProperty(name).apply()
-//    properties.get(name) match {
-//      case Some(value) => value
-//      case None => throw new IllegalArgumentException("no property named: " + name)
-//    }
-  }
+}
+
+class SimpleEntity(val entity : ClientEntity, val controlledBy : ClientId) {
 }
 
 trait EntityTypeContainer {
-  def createEntity(entityTypeId : EntityTypeId) : ClientEntity
+  def createEntity(entityTypeId : EntityTypeId, entityId : EntityId) : ClientEntity
 }
 
 class FunctionEntityTypeContainer extends EntityTypeContainer {
-  val entityTypes = new HashMap[EntityTypeId, () => ClientEntity]
-  def createEntity(entityTypeId : EntityTypeId) : ClientEntity = {
-    entityTypes.get(entityTypeId).get.apply()
+  val entityTypes = new HashMap[EntityTypeId, (EntityId) => ClientEntity]
+  def createEntity(entityTypeId : EntityTypeId, entityId : EntityId) : ClientEntity = {
+    entityTypes.get(entityTypeId).get.apply(entityId)
   }
-  def registerEntityType[T <: ClientEntity](function : () => T) = {
-    entityTypes.put(function.apply().entityTypeId, function)
-  }
-}
-
-class ClassEntityTypeContainer extends EntityTypeContainer {
-  def createEntity(entityTypeId : EntityTypeId) : ClientEntity = {
-    val entityType : Class[ClientEntity] = entityTypes.get(entityTypeId).get
-    entityType.getConstructor().newInstance().asInstanceOf[ClientEntity]
-  }
-
-  val entityTypes = new HashMap[EntityTypeId, Class[ClientEntity]]
-
-  def registerEntityType[T <: ClientEntity](entityType : Class[T]) = {
-    val entity = entityType.getConstructor().newInstance(null).asInstanceOf[ClientEntity]
-    entityTypes.put(entity.entityTypeId, entityType.asInstanceOf[Class[ClientEntity]])
+  def registerEntityType[T <: ClientEntity](function : (EntityId) => T) = {
+    entityTypes.put(function.apply(EntityId(-1)).entityTypeId, function)
   }
 }
 
-class SimpleClient(entityTypeContainer : EntityTypeContainer) extends EventListener  {
+class SimpleClient(entityTypeContainer : EntityTypeContainer) extends EventListener with ClientEntityContainer {
 //  type EntityBase = ClientEntity
 //  with EntityContainer
   var currentClient : ClientId = null
@@ -86,7 +61,10 @@ class SimpleClient(entityTypeContainer : EntityTypeContainer) extends EventListe
     }
 
     case NewEntityEvent(entityId, entityTypeId, controlledBy, properties) => {
-      entities.put(entityId, new SimpleEntity(entityTypeContainer.createEntity(entityTypeId), entityId, controlledBy, properties, propertyChangeListener))
+      val entity = entityTypeContainer.createEntity(entityTypeId, entityId)
+      entity.addPropertyChangeListener(propertyChangeListener)
+      properties.foreach(entity.changeProperty(_))
+      entities.put(entityId, new SimpleEntity(entity, controlledBy))
     }
 
     case RemoveEntity(entityId)  => {
@@ -94,7 +72,7 @@ class SimpleClient(entityTypeContainer : EntityTypeContainer) extends EventListe
     }
 
     case PropertyChangeEvent(entityId, property)  => {
-      entities.get(entityId).foreach(_.changeProperty(property))
+      entities.get(entityId).foreach(_.entity.changeProperty(property))
     }
 
     case BeginTurn(clientId)  => {
@@ -112,4 +90,9 @@ class SimpleClient(entityTypeContainer : EntityTypeContainer) extends EventListe
       }
     })
   }
+}
+
+trait ClientEntityContainer extends EntityContainer {
+  type EntityBase = ClientEntity
+
 }

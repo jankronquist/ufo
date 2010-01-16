@@ -1,8 +1,8 @@
 package tinkerway.ufo.game.simple.domain
 
 
-import api.EntityTypeId
-import ufo.domain.{Item, Being}
+import tinkerway.ufo.api.EntityTypeId
+import tinkerway.ufo.domain.{Item, Being}
 object Domain {
 
   trait HumanBeing extends Being {

@@ -44,7 +44,7 @@ abstract class ServerBeing(entityId : EntityId, initialPosition : Position, var 
       item.location() match {
         case EntityLocation(entityId) => throw ActionException(IllegalAction())
         case PositionLocation(itemPosition) => {
-          if (!this.position().equals(itemPosition)) {
+          if (!(this.position().equals(itemPosition) || this.position().isNextTo(itemPosition))) {
             throw ActionException(IllegalAction())
           }
         }
