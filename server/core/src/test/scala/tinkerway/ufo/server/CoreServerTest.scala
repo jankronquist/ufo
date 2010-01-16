@@ -117,6 +117,7 @@ class CoreServerTest {
 object ClientEventHandler extends PropertyContainer with HasPosition {
 
   val entityTypeId : EntityTypeId = null
+  val entityId : EntityId = null
 
   def init(client : SimpleClient) = {
     def animatePosition(entity : ClientEntity, from : Position, to : Position) = {

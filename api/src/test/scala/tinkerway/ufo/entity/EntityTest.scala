@@ -9,6 +9,7 @@ import org.mockito.Mockito._
 class DummyEntity extends AbstractEntity {
   object firstName extends Property[String]("Test") 
   val entityTypeId : EntityTypeId = null
+  val entityId : EntityId = null
   val entityType = classOf[DummyEntity]
   override def getAllProperties() = super.getAllProperties()
 }

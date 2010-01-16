@@ -116,15 +116,17 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
     if (selectedBeing != null) {
       val pos = selectedBeing.entity.asInstanceOf[HasPosition].position()
       val dest = Position(pos.x+xdiff, pos.y+ydiff)
-      val result = actionHandler.perform(new Move(selectedBeing.entityId, dest))
-      println(result)
+      actionHandler.perform(new Move(selectedBeing.entityId, dest))
     }
   }
   def pickUpItem(xdiff : Int, ydiff : Int) = {
     if (selectedBeing != null) {
       val pos = selectedBeing.entity.asInstanceOf[HasPosition].position()
-      val dest = Position(pos.x+xdiff, pos.y+ydiff)
-      println("pick up item at " + dest)
+      val targetPosition = Position(pos.x+xdiff, pos.y+ydiff)
+      client.findEntity(targetPosition) match {
+        case Some(item : Item) => actionHandler.perform(new ItemAction(selectedBeing.entityId, Take(), item.entityId, new PositionLocation(targetPosition)))
+        case _ => println("No item to pick up!")
+      }
     }
   }
 

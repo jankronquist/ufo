@@ -24,6 +24,7 @@ class CompositePropertyChangeListener extends PropertyChangeListener {
 
 trait Entity extends CompositePropertyChangeListener {
   val entityTypeId : EntityTypeId
+  val entityId : EntityId
 }
 
 
