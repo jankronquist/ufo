@@ -35,7 +35,7 @@ class CoreServerTest {
   def whenAddingAnEntitySendNewEntityEvent() = {
     val being1 = IdFactory.makeEntityId()
     server.addEntity(new ServerBeing(being1, Position(1, 1), server.getClient(client.clientId)) with Human)
-    assertTrue(client.entities.contains(being1))
+    assertTrue(client.findEntity(being1) != null)
   }
 
   @Test
@@ -46,7 +46,7 @@ class CoreServerTest {
 
     val targetPosition = Position(1, 2)
     performSuccessful(Move(being1, targetPosition))
-    val clientPosition = client.getEntity(being1).asInstanceOf[HasPosition].position()
+    val clientPosition = client.findEntity(being1).asInstanceOf[HasPosition].position()
     assertEquals(targetPosition, clientPosition)
   }
 

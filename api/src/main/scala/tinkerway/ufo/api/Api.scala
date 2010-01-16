@@ -56,7 +56,7 @@ case class PositionLocation(position : Position) extends Location
 
 case class ConnectEvent(clientId : ClientId, world : WorldDescription) extends Event
 
-case class NewEntityEvent(entityId : EntityId, entityType : EntityTypeId, controlledBy : ClientId, properties : List[PropertyValue]) extends Event
+case class NewEntityEvent(entityId : EntityId, entityType : EntityTypeId, properties : List[PropertyValue]) extends Event
 
 case class RemoveEntity(entityId : EntityId) extends Event
 

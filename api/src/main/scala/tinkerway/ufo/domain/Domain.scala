@@ -30,6 +30,7 @@ case class Alive() extends BeingState
 case class Dead() extends BeingState 
 
 trait Being extends PropertyContainer with HasPosition with HasHitPoints with HasBeingState {
+  object controlledBy extends Property[ClientId](null)
 }
 
 trait Human extends Being with AbstractEntity  {

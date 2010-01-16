@@ -15,11 +15,12 @@ abstract class ServerEntity(val entityId : EntityId) extends AbstractEntity {
   }
 }
 
-abstract class ServerBeing(entityId : EntityId, initialPosition : Position, var controlledBy : Client) extends ServerEntity(entityId) with Being {
+abstract class ServerBeing(entityId : EntityId, initialPosition : Position, initialControlledBy : Client) extends ServerEntity(entityId) with Being {
   position := initialPosition
+  controlledBy := initialControlledBy.clientId
 
   def assertControlledBy(client : Client) = {
-    if (client != controlledBy) {
+    if (client.clientId != controlledBy()) {
       throw ActionException(NotInYourControl())
     }
   }
@@ -233,8 +234,7 @@ class Server(world : World) extends ServerEntityContainer with ServerConnector {
 
   def addEntity(entity : ServerEntity) : Unit = {
     internalAddEntity(entity.entityId, entity)
-    val controlledBy : ClientId = if (entity.isInstanceOf[ServerBeing]) entity.asInstanceOf[ServerBeing].controlledBy.clientId else null
-    sendToAll(NewEntityEvent(entity.entityId, entity.entityTypeId, controlledBy, entity.getAllPropertyValues()))
+    sendToAll(NewEntityEvent(entity.entityId, entity.entityTypeId, entity.getAllPropertyValues()))
     entity.addPropertyChangeListener(propertyChangeListener)
   }
 
@@ -247,11 +247,11 @@ trait ServerEntityContainer extends EntityContainer {
   type EntityBase = ServerEntity
 
   def findBeing(beingId : EntityId) : ServerBeing = {
-    findEntity[ServerBeing](beingId)
+    findEntity(beingId).asInstanceOf[ServerBeing]
   }
 
   def findItem(itemId : EntityId) : ServerItem = {
-    findEntity[ServerItem](itemId)
+    findEntity(itemId).asInstanceOf[ServerItem]
   }
 
 }

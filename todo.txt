@@ -2,7 +2,7 @@
 TODO:
 * Pick up items
 * Entity ska ha id?
-* Controlledby Šr en property
-
 * Action points
 
+DONE:
+* Controlledby Šr en property

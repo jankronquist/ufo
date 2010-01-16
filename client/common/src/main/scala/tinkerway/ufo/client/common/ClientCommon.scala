@@ -23,9 +23,6 @@ abstract class ClientEntity(val entityId : EntityId) extends AbstractEntity with
 
 }
 
-class SimpleEntity(val entity : ClientEntity, val controlledBy : ClientId) {
-}
-
 trait EntityTypeContainer {
   def createEntity(entityTypeId : EntityTypeId, entityId : EntityId) : ClientEntity
 }
@@ -47,11 +44,6 @@ class SimpleClient(entityTypeContainer : EntityTypeContainer) extends EventListe
   var clientId : ClientId = null
   var world : WorldDescription = null
   val propertyChangeListener = new CompositePropertyChangeListener()
-  val entities = new HashMap[EntityId, SimpleEntity]
-
-  def getEntity(entityId : EntityId) : ClientEntity = {
-    entities.get(entityId).get.entity
-  }
 
   def receive(event : Event) = event match {
 
@@ -60,19 +52,19 @@ class SimpleClient(entityTypeContainer : EntityTypeContainer) extends EventListe
       this.world = world
     }
 
-    case NewEntityEvent(entityId, entityTypeId, controlledBy, properties) => {
+    case NewEntityEvent(entityId, entityTypeId, properties) => {
       val entity = entityTypeContainer.createEntity(entityTypeId, entityId)
       entity.addPropertyChangeListener(propertyChangeListener)
       properties.foreach(entity.changeProperty(_))
-      entities.put(entityId, new SimpleEntity(entity, controlledBy))
+      internalAddEntity(entityId, entity)
     }
 
     case RemoveEntity(entityId)  => {
-      entities.removeKey(entityId)
+      removeEntity(entityId)
     }
 
     case PropertyChangeEvent(entityId, property)  => {
-      entities.get(entityId).foreach(_.entity.changeProperty(property))
+      findEntity(entityId).changeProperty(property)
     }
 
     case BeginTurn(clientId)  => {

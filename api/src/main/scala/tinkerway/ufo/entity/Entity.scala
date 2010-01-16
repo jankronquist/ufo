@@ -117,6 +117,10 @@ trait EntityContainer {
   type EntityBase <: Entity
   private val entities = new HashMap[EntityId, EntityBase]()
 
+  def removeEntity(entityId : EntityId) : Unit = {
+    entities.removeKey(entityId)
+  }
+
   def internalAddEntity(entityId : EntityId, entity : EntityBase) : Unit = {
     if (entities.contains(entityId)) {
       throw new IllegalArgumentException("Duplicate id: " + entityId)
@@ -134,10 +138,12 @@ trait EntityContainer {
     })
   }
 
-  def findEntity[T](entityId : EntityId) : T = {
+  def findEntity(entityId : EntityId) : EntityBase = {
     entities.get(entityId) match {
-      case Some(entity) => entity.asInstanceOf[T]
+      case Some(entity) => entity
       case None => throw new IllegalArgumentException("Entity does not exists")
     }
   }
+
+  def getAllEntities() = entities.values
 }

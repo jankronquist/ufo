@@ -53,22 +53,21 @@ class CoreClientTest {
     val entityId1 = new EntityId(1)
     val entityId2 = new EntityId(2)
     val entityType = human.entityTypeId
-    val controlledBy = new ClientId(1)
     val properties : List[PropertyValue] = Nil
     val newPosition = new Position(1, 2)
 
-    client.receive(new NewEntityEvent(entityId1, entityType, controlledBy, properties))
-    client.receive(new NewEntityEvent(entityId2, entityType, controlledBy, properties))
+    client.receive(new NewEntityEvent(entityId1, entityType, properties))
+    client.receive(new NewEntityEvent(entityId2, entityType, properties))
     client.receive(new PropertyChangeEvent(entityId1, new PropertyValue("position", newPosition)))
     
     assertNull(human.dummy)
-    assertEquals(newPosition, client.getEntity(entityId1).asInstanceOf[DummyEventHandler].dummy)
+    assertEquals(newPosition, client.findEntity(entityId1).asInstanceOf[DummyEventHandler].dummy)
     assertEquals(newPosition, globalPositionCapture.result)
     assertEquals(1, globalPositionCapture.count)
-    assertNull(client.getEntity(entityId2).asInstanceOf[DummyEventHandler].dummy)
-    assertEquals(newPosition, client.getEntity(entityId1).asInstanceOf[Human].position())
+    assertNull(client.findEntity(entityId2).asInstanceOf[DummyEventHandler].dummy)
+    assertEquals(newPosition, client.findEntity(entityId1).asInstanceOf[Human].position())
     assertNull(human.position())
-    assertNull(client.getEntity(entityId2).asInstanceOf[Human].position())
+    assertNull(client.findEntity(entityId2).asInstanceOf[Human].position())
   }
 
 }

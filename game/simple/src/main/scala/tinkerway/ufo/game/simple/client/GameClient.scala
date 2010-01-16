@@ -7,7 +7,7 @@ import tinkerway.ufo.game.simple.domain.Domain._
 import java.io.File
 import org.newdawn.slick._
 import tinkerway.ufo.client.common._
-import tinkerway.ufo.domain.{Item, HasPosition}
+import tinkerway.ufo.domain.{Being, Item, HasPosition}
 
 class TheClientApp(server : ServerConnector) {
 
@@ -60,8 +60,8 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
   var y : Int = 0
   var scale : Float = 1
   var world : List[Int] = Nil
-  var selectedBeing : SimpleEntity = null
-  var entityIterator : Iterator[SimpleEntity] = null
+  var selectedBeing : ClientEntity = null
+  var entityIterator : Iterator[ClientEntity] = null
   // TODO: these should really be val
   var client : SimpleClient = null
   var actionHandler : ActionHandler = null
@@ -77,8 +77,6 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
     val entityTypes = new FunctionEntityTypeContainer
     entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with ClientHumanBeing)
     entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with ClientHealingPotion)
-//    entityTypes.registerEntityType(classOf[ClientHumanBeing])
-//    entityTypes.registerEntityType(classOf[ClientHealingPotion])
     client = new SimpleClient(entityTypes)
     actionHandler = server.connect(client)
     startSignal.countDown()
@@ -100,12 +98,12 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
     } else if(input.isKeyDown(Input.KEY_J)) {
       pickUpItem(-1, 0)
     } else if(input.isKeyDown(Input.KEY_SPACE)) {
-      var nextBeing : Option[SimpleEntity] = None
+      var nextBeing : Option[ClientEntity] = None
       while (nextBeing == None) {
         if (entityIterator == null || entityIterator.hasNext == false) {
-          entityIterator = client.entities.values
+          entityIterator = client.getAllEntities()
         }
-        nextBeing = entityIterator.find(e => client.clientId.equals(e.controlledBy))
+        nextBeing = entityIterator.find(e => e.entity.isInstanceOf[Being] && client.clientId.equals(e.entity.asInstanceOf[Being].controlledBy()))
       }
       selectedBeing = nextBeing.get
       println("SELECTED: " + selectedBeing)
@@ -118,7 +116,7 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
     if (selectedBeing != null) {
       val pos = selectedBeing.entity.asInstanceOf[HasPosition].position()
       val dest = Position(pos.x+xdiff, pos.y+ydiff)
-      val result = actionHandler.perform(new Move(selectedBeing.entity.entityId, dest))
+      val result = actionHandler.perform(new Move(selectedBeing.entityId, dest))
       println(result)
     }
   }
@@ -131,7 +129,7 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
   }
 
   override def render(gc: GameContainer, g: Graphics) = {
-    client.entities.values.foreach(e  => {
+    client.getAllEntities().foreach(e  => {
       if (e.entity.isInstanceOf[Sprite]) {
         val sprite = e.entity.asInstanceOf[Sprite]
         sprite.render(gc, g)
