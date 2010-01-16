@@ -1,5 +1,7 @@
 
 TODO:
+* Use item
+* Inventory on client
 * Action points
 
 DONE:

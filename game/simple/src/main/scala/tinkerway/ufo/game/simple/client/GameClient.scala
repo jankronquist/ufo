@@ -79,6 +79,23 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
     entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with ClientHealingPotion)
     client = new SimpleClient(entityTypes)
     actionHandler = server.connect(client)
+
+    val someHealingPotion = new ClientEntity(EntityId(-1)) with ClientHealingPotion
+
+    // TODO: how to handle the case when an item is removed? (it need to be removed from the inventory as well)
+    client.onPropertyChange(someHealingPotion.location, (entity : ClientEntity, from : Location, to : Location) => {
+      println("Location has changed!")
+      from match {
+        case EntityLocation(entityId : EntityId) => client.findEntity(entityId).removeEntity(entity)
+        case _ =>
+      }
+      to match {
+        case EntityLocation(entityId : EntityId) => client.findEntity(entityId).addEntity(entity)
+        case _ =>
+      }
+    })
+    
+
     startSignal.countDown()
     actionHandler.perform(BeginGame())
     gc.setVSync(true)
@@ -97,15 +114,17 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
       moveEntity(0, 1)
     } else if(input.isKeyDown(Input.KEY_J)) {
       pickUpItem(-1, 0)
+    } else if(input.isKeyDown(Input.KEY_U)) {
+      useItem()
     } else if(input.isKeyDown(Input.KEY_SPACE)) {
-      var nextBeing : Option[ClientEntity] = None
-      while (nextBeing == None) {
+      var nextBeing : ClientEntity = null
+      while (nextBeing == null) {
         if (entityIterator == null || entityIterator.hasNext == false) {
-          entityIterator = client.getAllEntities()
+          entityIterator = client.getAllEntities().filter(e => e.entity.isInstanceOf[Being] && client.clientId.equals(e.entity.asInstanceOf[Being].controlledBy()))
         }
-        nextBeing = entityIterator.find(e => e.entity.isInstanceOf[Being] && client.clientId.equals(e.entity.asInstanceOf[Being].controlledBy()))
+        nextBeing = entityIterator.next()
       }
-      selectedBeing = nextBeing.get
+      selectedBeing = nextBeing
       println("SELECTED: " + selectedBeing)
       Thread.sleep(50)
     }
@@ -114,18 +133,28 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
 
   def moveEntity(xdiff : Int, ydiff : Int) = {
     if (selectedBeing != null) {
-      val pos = selectedBeing.entity.asInstanceOf[HasPosition].position()
+      val pos = selectedBeing.asInstanceOf[HasPosition].position()
       val dest = Position(pos.x+xdiff, pos.y+ydiff)
       actionHandler.perform(new Move(selectedBeing.entityId, dest))
     }
   }
   def pickUpItem(xdiff : Int, ydiff : Int) = {
     if (selectedBeing != null) {
-      val pos = selectedBeing.entity.asInstanceOf[HasPosition].position()
+      val pos = selectedBeing.asInstanceOf[HasPosition].position()
       val targetPosition = Position(pos.x+xdiff, pos.y+ydiff)
       client.findEntity(targetPosition) match {
         case Some(item : Item) => actionHandler.perform(new ItemAction(selectedBeing.entityId, Take(), item.entityId, new PositionLocation(targetPosition)))
         case _ => println("No item to pick up!")
+      }
+    }
+  }
+
+  // TODO: should include which item to use
+  def useItem() = {
+    if (selectedBeing != null) {
+      selectedBeing.getItem() match {
+        case Some(item : Item) => actionHandler.perform(new ItemAction(selectedBeing.entityId, Use(), item.entityId, new EntityLocation(selectedBeing.entityId)))
+        case _ => println("No item to use!!!")
       }
     }
   }

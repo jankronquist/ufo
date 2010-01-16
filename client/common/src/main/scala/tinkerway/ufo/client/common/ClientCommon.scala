@@ -7,6 +7,8 @@ import java.io.Serializable
 import java.lang.reflect.Method
 import java.util.Arrays
 import scala.collection.mutable.HashMap
+import collection.jcl.ArrayList
+import tinkerway.ufo.domain.Item
 
 abstract class ClientEntity(val entityId : EntityId) extends AbstractEntity with Serializable {
   def getProperty(name : String) : Property[Object] = {
@@ -21,6 +23,21 @@ abstract class ClientEntity(val entityId : EntityId) extends AbstractEntity with
     prop := property.value
   }
 
+  private val entities : ArrayList[ClientEntity] = new ArrayList[ClientEntity]
+
+  def getItem() = {
+    entities.find(e => e.isInstanceOf[Item])
+  }
+
+  def addEntity(entity : ClientEntity) = {
+    println("this=" + this + " now contains: " + entity)
+    entities.add(entity)
+  }
+
+  def removeEntity(entity : ClientEntity) = {
+    println("this=" + this + " no longer contains: " + entity)
+    entities.remove(entity)
+  }
 }
 
 trait EntityTypeContainer {
