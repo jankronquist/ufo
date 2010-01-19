@@ -34,14 +34,18 @@ trait Sprite extends GameConstants {
   }
 }
 
-trait ClientHumanBeing extends HumanBeing with Sprite {
-  val sx = (Math.random*4).asInstanceOf[Int]
-  val sy = (Math.random*4).asInstanceOf[Int]
-  val image = GlobalData.beings.getSprite(sx, sy)
-}
+trait ClientDomain {
+  this : SpriteSheetContainer =>
+  
+  trait ClientHumanBeing extends HumanBeing with Sprite {
+    val sx = (Math.random*4).asInstanceOf[Int]
+    val sy = (Math.random*4).asInstanceOf[Int]
+    val image = beings.getSprite(sx, sy)
+  }
 
-trait ClientHealingPotion extends HealingPotion with Sprite {
-  val image = GlobalData.misc.getSprite(2, 2)
+  trait ClientHealingPotion extends HealingPotion with Sprite {
+    val image = misc.getSprite(2, 2)
+  }
 }
 
 trait GameConstants {
@@ -49,13 +53,14 @@ trait GameConstants {
   val tileHeight = 32
 }
 
-object GlobalData {
-  var tiles : SpriteSheet = null
-  var beings : SpriteSheet = null
-  var misc : SpriteSheet = null
+trait SpriteSheetContainer {
+  var tiles : SpriteSheet
+  var beings : SpriteSheet
+  var misc : SpriteSheet
 }
 
-class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) extends BasicGame("SimpleGame") with GameConstants {
+
+class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) extends BasicGame("SimpleGame") with GameConstants with ClientDomain with SpriteSheetContainer {
   var x : Int = 0
   var y : Int = 0
   var scale : Float = 1
@@ -66,14 +71,19 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
   var client : SimpleClient = null
   var actionHandler : ActionHandler = null
 
+  var tiles : SpriteSheet = null
+  var beings : SpriteSheet = null
+  var misc : SpriteSheet = null
+
+
   def loadImage(name : String) = {
     new Image(Thread.currentThread.getContextClassLoader.getResourceAsStream(name), name, false)
   }
 
   override def init(gc: GameContainer) = {
-    GlobalData.tiles = new SpriteSheet(loadImage("ground/dg_dungeon32.gif"), tileWidth, tileHeight)
-    GlobalData.beings = new SpriteSheet(loadImage("beings/dg_humans32.gif"), tileWidth, tileHeight)
-    GlobalData.misc = new SpriteSheet(loadImage("items/dg_misc32.gif"), tileWidth, tileHeight)
+    tiles = new SpriteSheet(loadImage("ground/dg_dungeon32.gif"), tileWidth, tileHeight)
+    beings = new SpriteSheet(loadImage("beings/dg_humans32.gif"), tileWidth, tileHeight)
+    misc = new SpriteSheet(loadImage("items/dg_misc32.gif"), tileWidth, tileHeight)
     val entityTypes = new FunctionEntityTypeContainer
     entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with ClientHumanBeing)
     entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with ClientHealingPotion)
