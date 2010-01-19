@@ -47,6 +47,10 @@ trait ClientDomain {
   trait ClientHealingPotion extends HealingPotion with Sprite {
     val image = misc.getSprite(2, 2)
   }
+
+  trait ClientGun extends Gun with Sprite {
+    val image = misc.getSprite(3, 2)
+  }
 }
 
 trait GameConstants {
@@ -88,6 +92,7 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
     val entityTypes = new FunctionEntityTypeContainer
     entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with ClientHumanBeing)
     entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with ClientHealingPotion)
+    entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with ClientGun)
     client = new SimpleClient(entityTypes)
     actionHandler = server.connect(client)
 
