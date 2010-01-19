@@ -7,7 +7,8 @@ import tinkerway.ufo.game.simple.domain.Domain._
 import java.io.File
 import org.newdawn.slick._
 import tinkerway.ufo.client.common._
-import tinkerway.ufo.domain.{Being, Item, HasPosition}
+import tinkerway.ufo.entity.EntityListener
+import tinkerway.ufo.domain.{HasLocation, Being, Item, HasPosition}
 
 class TheClientApp(server : ServerConnector) {
 
@@ -90,10 +91,10 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
     client = new SimpleClient(entityTypes)
     actionHandler = server.connect(client)
 
-    val someHealingPotion = new ClientEntity(EntityId(-1)) with ClientHealingPotion
+    val hasLocation = new ClientEntity(EntityId(-1)) with ClientHealingPotion
 
     // TODO: how to handle the case when an item is removed? (it need to be removed from the inventory as well)
-    client.onPropertyChange(someHealingPotion.location, (entity : ClientEntity, from : Location, to : Location) => {
+    client.onPropertyChange(hasLocation.location, (entity : ClientEntity, from : Location, to : Location) => {
       println("Location has changed!")
       from match {
         case EntityLocation(entityId : EntityId) => client.findEntity(entityId).removeEntity(entity)
@@ -104,11 +105,25 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
         case _ =>
       }
     })
+    client.addEntityListener(ClientEntityListener)
     
 
     startSignal.countDown()
     actionHandler.perform(BeginGame())
     gc.setVSync(true)
+  }
+
+  object ClientEntityListener extends EntityListener[ClientEntity] {
+    def entityAdded(entity : ClientEntity) = {
+    }
+    def entityRemoved(entity : ClientEntity) = {
+      if (entity.isInstanceOf[HasLocation]) {
+        entity.asInstanceOf[HasLocation].location() match {
+          case EntityLocation(entityId : EntityId) => client.findEntity(entityId).removeEntity(entity)
+          case _ =>
+        }
+      }
+    }
   }
 
   override def update(gc: GameContainer, delta: Int) = {

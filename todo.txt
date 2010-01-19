@@ -1,10 +1,14 @@
 
 TODO:
-* Use item
-* Inventory on client
 * Action points
+* Some simple Weapon (to be able to receive events for firing)
+* Enemy, controlled by "AI" player (to test end turn and different players connecting)
+* API to include Entity references instead of ID:s and then transform to ID:s on the wire
+* Inventory on server (remove entity)
 
 DONE:
+* Use item
+* Inventory on client
 * Entity ska ha id
 * Pick up items
 * Controlledby Šr en property

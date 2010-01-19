@@ -114,18 +114,47 @@ class CapturePropertyChangeListener extends PropertyChangeListener {
   }
 }
 
+trait EntityListener[EntityBase <: Entity] {
+  def entityAdded(entity : EntityBase)
+  def entityRemoved(entity : EntityBase)
+}
+
+class CompositeEntityListener[EntityBase <: Entity] extends EntityListener[EntityBase] {
+  private var listeners : List[EntityListener[EntityBase]] = Nil
+  
+  def entityAdded(entity : EntityBase) = {
+    listeners.foreach(_.entityAdded(entity))
+  }
+  def entityRemoved(entity : EntityBase) = {
+    listeners.foreach(_.entityRemoved(entity))
+  }
+
+  def addEntityListener(el : EntityListener[EntityBase]) = {
+    listeners = el :: listeners
+  }
+}
+
 trait EntityContainer {
   type EntityBase <: Entity
   private val entities = new HashMap[EntityId, EntityBase]()
+  private val entityListener = new CompositeEntityListener[EntityBase]
+
+  def addEntityListener(el : EntityListener[EntityBase]) = {
+    entityListener.addEntityListener(el)
+  }
 
   def removeEntity(entityId : EntityId) : Unit = {
-    entities.removeKey(entityId)
+    entities.removeKey(entityId) match {
+      case Some(entity) => entityListener.entityRemoved(entity)
+      case _ => 
+    }
   }
 
   def internalAddEntity(entityId : EntityId, entity : EntityBase) : Unit = {
     if (entities.contains(entityId)) {
       throw new IllegalArgumentException("Duplicate id: " + entityId)
     }
+    entityListener.entityAdded(entity)
     entities.put(entityId, entity)
   }
 
