@@ -92,4 +92,6 @@ case class NotInYourControl() extends ActionResult
 
 case class IllegalAction() extends ActionResult
 
+case class NotEnoughActionPoints() extends ActionResult
+
 case class EntityDoesNotExist() extends ActionResult

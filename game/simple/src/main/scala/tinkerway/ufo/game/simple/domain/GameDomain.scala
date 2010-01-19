@@ -8,10 +8,12 @@ object Domain {
 
   trait HumanBeing extends Being {
     val entityTypeId = new EntityTypeId(1)
+    maxActionPoints := 10
   }
 
   trait AlienWithClaws extends Being {
     val entityTypeId = new EntityTypeId(4)
+    maxActionPoints := 8
   }
 
   trait HealingPotion extends Item {

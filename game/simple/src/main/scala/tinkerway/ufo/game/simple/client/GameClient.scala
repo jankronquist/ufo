@@ -141,6 +141,8 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
       pickUpItem(-1, 0)
     } else if(input.isKeyDown(Input.KEY_U)) {
       useItem()
+    } else if(input.isKeyDown(Input.KEY_E)) {
+      endTurn()
     } else if(input.isKeyDown(Input.KEY_SPACE)) {
       var nextBeing : ClientEntity = null
       while (nextBeing == null) {
@@ -182,6 +184,10 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
         case _ => println("No item to use!!!")
       }
     }
+  }
+
+  def endTurn() = {
+    actionHandler.perform(EndTurn())
   }
 
   override def render(gc: GameContainer, g: Graphics) = {

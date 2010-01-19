@@ -166,6 +166,9 @@ class Server(world : World) extends ServerEntityContainer with ServerConnector {
       }
       case Move(beingId, position) => {
         val being = findBeingToPerformAction(beingId)
+        if (being.actionPoints() < 1) {
+          throw new ActionException(NotEnoughActionPoints())
+        }
         if (position.x < 0 || position.y < 0 || position.x >= world.size.x || position.y >= world.size.y) {
           throw new ActionException(IllegalAction())
         }
@@ -175,10 +178,17 @@ class Server(world : World) extends ServerEntityContainer with ServerConnector {
         }
         // TODO: check tiles
         being.moveTo(position)
+
+        // TODO: better way to handle action points
+        being.actionPoints := being.actionPoints() - 1
       }
       case ItemAction(beingId, action, itemId, location) => {
         val being = findBeingToPerformAction(beingId)
+        if (being.actionPoints() < 1) {
+          throw new ActionException(NotEnoughActionPoints())
+        }
         being.performItemAction(action, findItem(itemId), location)
+        being.actionPoints := being.actionPoints() - 1
       }
     }
 
@@ -208,6 +218,7 @@ class Server(world : World) extends ServerEntityContainer with ServerConnector {
       throw new IllegalStateException("No clients connected")
     }
     turn = new Turn(clients)
+    getAllEntities().filter(_.isInstanceOf[Being]).foreach(_.asInstanceOf[Being].resetActionPoints())
     nextClient()
   }
 

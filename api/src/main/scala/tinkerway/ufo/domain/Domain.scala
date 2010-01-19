@@ -17,25 +17,20 @@ trait HasHitPoints {
   object hitPoints extends Property[Int](0)
 }
 
-trait HasBeingState {
-  this : PropertyContainer =>
-  object state extends Property[BeingState](Alive())
-}
-
-
 class BeingState
 
 case class Alive() extends BeingState
 
 case class Dead() extends BeingState 
 
-trait Being extends PropertyContainer with HasPosition with HasHitPoints with HasBeingState {
+trait Being extends PropertyContainer with HasPosition with HasHitPoints {
   object controlledBy extends Property[ClientId](null)
-}
-
-trait Human extends Being with AbstractEntity  {
-  val entityTypeId = EntityTypeId(1)
-  val entityType = classOf[Human]
+  object state extends Property[BeingState](Alive())
+  object actionPoints extends Property[Int](0)
+  object maxActionPoints extends Property[Int](0)
+  def resetActionPoints() = {
+    actionPoints := maxActionPoints()
+  }
 }
 
 ///////////////////////////

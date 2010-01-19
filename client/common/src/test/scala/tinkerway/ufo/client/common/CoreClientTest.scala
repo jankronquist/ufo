@@ -3,10 +3,17 @@ package tinkerway.ufo.client.common
 
 
 import tinkerway.ufo.api._
-import tinkerway.ufo.domain.{HasPosition, Human}
 import org.junit._
 import Assert._
-import tinkerway.ufo.entity.{PropertyContainer, Property}
+import tinkerway.ufo.entity.{AbstractEntity, PropertyContainer, Property}
+import tinkerway.ufo.domain.{Being, HasPosition}
+
+trait Human extends Being with AbstractEntity  {
+  val entityTypeId = EntityTypeId(1)
+  actionPoints := 10
+  maxActionPoints := 10
+}
+
 
 trait DummyEventHandler {
   this : PropertyContainer with HasPosition =>

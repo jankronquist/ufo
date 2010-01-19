@@ -2,13 +2,18 @@ package tinkerway.ufo.server
 
 import tinkerway.ufo.api._
 import tinkerway.ufo.client.common.{FunctionEntityTypeContainer, SimpleClient, ClientEntity}
-import tinkerway.ufo.domain.{HasPosition, Human}
 import tinkerway.ufo.entity._
 import java.lang.reflect.{Method, InvocationHandler, Proxy}
 import org.junit.Assert._
 import org.junit.{Ignore, Test, Before}
 import scala.collection.mutable.HashMap
+import tinkerway.ufo.domain.{Being, HasPosition}
 
+trait Human extends Being with AbstractEntity  {
+  val entityTypeId = EntityTypeId(1)
+  actionPoints := 10
+  maxActionPoints := 10
+}
 
 trait ClientHuman extends Human
 
