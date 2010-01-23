@@ -175,7 +175,7 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
       val pos = selectedBeing.asInstanceOf[HasPosition].position()
       val targetPosition = Position(pos.x+xdiff, pos.y+ydiff)
       client.findEntity(targetPosition) match {
-        case Some(item : Item) => actionHandler.perform(new ItemAction(selectedBeing.entityId, Take(), item.entityId, new PositionLocation(targetPosition)))
+        case Some(item : Item) => actionHandler.perform(new ItemAction(selectedBeing.entityId, Place(), item.entityId, new PositionLocation(targetPosition)))
         case _ => println("No item to pick up!")
       }
     }

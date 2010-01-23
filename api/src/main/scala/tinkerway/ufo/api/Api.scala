@@ -70,7 +70,6 @@ case class BeginTurn(clientId : ClientId) extends Event
 
 sealed abstract class ItemActionType
 
-case class Take() extends ItemActionType
 case class Place() extends ItemActionType
 case class Use() extends ItemActionType
 

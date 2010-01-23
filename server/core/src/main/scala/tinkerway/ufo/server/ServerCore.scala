@@ -41,23 +41,24 @@ abstract class ServerBeing(entityId : EntityId, initialPosition : Position, init
   }
 
   def performItemAction(action : ItemActionType, item : ServerItem, location : Location) = action match {
-    case Take() => {
-      item.location() match {
-        case EntityLocation(entityId) => throw ActionException(IllegalAction())
-        case PositionLocation(itemPosition) => {
-          if (!(this.position().equals(itemPosition) || this.position().isNextTo(itemPosition))) {
-            throw ActionException(IllegalAction())
+    case Place() => {
+      if (!inventory.contains(item)) {
+        item.location() match {
+          case EntityLocation(entityId) => throw ActionException(IllegalAction())
+          case PositionLocation(itemPosition) => {
+            if (!(this.position().equals(itemPosition) || this.position().isNextTo(itemPosition))) {
+              throw ActionException(IllegalAction())
+            }
           }
         }
+        inventory = item :: inventory
+        item.location := new EntityLocation(entityId)
+      } else {
+        assertItemInInventory(item)
+        inventory = inventory.remove(_ == item)
+        item.location := new PositionLocation(position())
+        // TODO: check location (ie where the item was dropped) allow drop on entity
       }
-      inventory = item :: inventory
-      item.location := new EntityLocation(entityId)
-    }
-    case Place() => {
-      assertItemInInventory(item)
-      inventory = inventory.remove(_ == item)
-      item.location := new PositionLocation(position())
-      // TODO: check location (ie where the item was dropped) allow drop on entity
     }
     case Use() => {
       assertItemInInventory(item)
