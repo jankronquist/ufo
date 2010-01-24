@@ -5,29 +5,6 @@ import java.io.Serializable
 import java.lang.reflect.Method
 import tinkerway.ufo.api._
 
-case class PropertyChange[T](entity : Entity, name : String, oldValue : T, newValue : T)
-
-trait PropertyChangeListener extends Serializable {
-  def propertyChange[T](event : PropertyChange[T])
-}
-
-class CompositePropertyChangeListener extends PropertyChangeListener {
-  private var propertyChangeListeners : List[PropertyChangeListener] = Nil
-  def addPropertyChangeListener(pcl : PropertyChangeListener) = {
-    propertyChangeListeners = pcl :: propertyChangeListeners
-  }
-
-  def propertyChange[T](event : PropertyChange[T]) = {
-    propertyChangeListeners.foreach(_.propertyChange(event))
-  }
-}
-
-trait Entity extends CompositePropertyChangeListener {
-  val entityTypeId : EntityTypeId
-  val entityId : EntityId
-}
-
-
 class Property[T](private var currentValue : T)(implicit entity : Entity) extends Serializable {
   private val listener = new CompositePropertyChangeListener()
 

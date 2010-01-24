@@ -1,5 +1,7 @@
 package tinkerway.ufo.api
 
+import java.io.Serializable
+
 trait Event
 
 trait Action
@@ -48,7 +50,7 @@ case class PropertyValue(name : String, value : Object)
 
 sealed abstract class Location
 
-case class EntityLocation(entityId : EntityId) extends Location
+case class EntityLocation(entity : Entity) extends Location
 
 case class PositionLocation(position : Position) extends Location
 
@@ -94,3 +96,27 @@ case class IllegalAction() extends ActionResult
 case class NotEnoughActionPoints() extends ActionResult
 
 case class EntityDoesNotExist() extends ActionResult
+
+// entities
+
+case class PropertyChange[T](entity : Entity, name : String, oldValue : T, newValue : T)
+
+trait PropertyChangeListener extends Serializable {
+  def propertyChange[T](event : PropertyChange[T])
+}
+
+class CompositePropertyChangeListener extends PropertyChangeListener {
+  private var propertyChangeListeners : List[PropertyChangeListener] = Nil
+  def addPropertyChangeListener(pcl : PropertyChangeListener) = {
+    propertyChangeListeners = pcl :: propertyChangeListeners
+  }
+
+  def propertyChange[T](event : PropertyChange[T]) = {
+    propertyChangeListeners.foreach(_.propertyChange(event))
+  }
+}
+
+trait Entity extends CompositePropertyChangeListener {
+  val entityTypeId : EntityTypeId
+  val entityId : EntityId
+}

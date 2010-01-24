@@ -5,6 +5,7 @@ package tinkerway.ufo.game.simple.server
 import tinkerway.ufo.api._
 import tinkerway.ufo.server._
 import tinkerway.ufo.game.simple.domain.Domain.{Gun, HealingPotion, HumanBeing}
+import tinkerway.ufo.domain.{HasLocation, HasPosition}
 
 trait ServerHealingPotion extends HealingPotion with Usable {
   def use(user : ServerBeing, location : Location) = {
@@ -13,8 +14,18 @@ trait ServerHealingPotion extends HealingPotion with Usable {
 }
 
 trait ServerGun extends Gun with Usable {
+  def findPosition(location : Location) : Position = {
+    location match {
+      case PositionLocation(pos) => pos
+      case EntityLocation(entity) => entity match {
+        case e : HasPosition =>  e.position()
+        case e : HasLocation => findPosition(e.location())
+        case _ => throw new IllegalStateException("failed to find position!")
+      }
+    }
+  }
   def use(user : ServerBeing, location : Location) = {
-    println("Fire weapon, target=" + location)
+    println("Fire weapon, target=" + findPosition(location))
   }
 }
 

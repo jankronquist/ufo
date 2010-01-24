@@ -52,7 +52,7 @@ abstract class ServerBeing(entityId : EntityId, initialPosition : Position, init
           }
         }
         inventory = item :: inventory
-        item.location := new EntityLocation(entityId)
+        item.location := new EntityLocation(this)
       } else {
         assertItemInInventory(item)
         inventory = inventory.remove(_ == item)

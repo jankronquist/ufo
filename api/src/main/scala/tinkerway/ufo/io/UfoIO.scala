@@ -1,13 +1,14 @@
 package tinkerway.ufo.io
 
 import java.io.{ObjectInputStream, ByteArrayInputStream, ObjectOutputStream, ByteArrayOutputStream}
-import tinkerway.ufo.api._
 import com.thoughtworks.xstream.io.json.JettisonMappedXmlDriver
 import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.mapper.{MapperWrapper, Mapper}
 import com.thoughtworks.xstream.converters.{UnmarshallingContext, MarshallingContext, Converter, SingleValueConverter}
 import com.thoughtworks.xstream.io.{HierarchicalStreamReader, HierarchicalStreamWriter}
-import tinkerway.ufo.entity.{Entity, EntityContainer}
+import tinkerway.ufo.entity.EntityContainer
+import tinkerway.ufo.api._
+
 
 class SerializingServerConnector(connector : ServerConnector) extends ServerConnector {
   private def makeSerialized[T](obj : T) = {
@@ -84,5 +85,34 @@ class EntityXStream(entityContainer : EntityContainer) extends XStream(new Jetti
   registerConverter(new EntityConverter(entityContainer))
   override def wrapMapper(next :MapperWrapper ) : MapperWrapper = {
       new EntityMapperWrapper(next)
+  }
+}
+
+class XStreamServerConnector(connector : ServerConnector) extends ServerConnector {
+  val serverXStream = new EntityXStream(connector.asInstanceOf[EntityContainer])
+
+  def connect(eventListener : EventListener) : ActionHandler = {
+    val clientXStream = new EntityXStream(eventListener.asInstanceOf[EntityContainer])
+    def server2client[T](o : T) = {
+      val payload = serverXStream.toXML(o)
+      println("server2client: " + payload)
+      clientXStream.fromXML(payload).asInstanceOf[T]
+    }
+    def client2server[T](o : T) = {
+      val payload = clientXStream.toXML(o)
+      println("client2server: " + payload)
+      serverXStream.fromXML(payload).asInstanceOf[T]
+    }
+    class InnerEventListener extends EventListener {
+      def receive(event : Event) = {
+        eventListener.receive(server2client(event))
+      }
+    }
+    class InnerActionHandler(actionHandler : ActionHandler) extends ActionHandler {
+      def perform(action : Action) : ActionResult = {
+        server2client(actionHandler.perform(client2server(action)))
+      }
+    }
+    new InnerActionHandler(connector.connect(new InnerEventListener()))
   }
 }

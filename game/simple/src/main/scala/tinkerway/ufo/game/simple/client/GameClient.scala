@@ -106,7 +106,7 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
         case _ =>
       }
       to match {
-        case EntityLocation(entityId : EntityId) => client.findEntity(entityId).addEntity(entity)
+        case EntityLocation(parentEntity : ClientEntity) => parentEntity.addEntity(entity)
         case _ =>
       }
     })
@@ -185,7 +185,7 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
   def useItem() = {
     if (selectedBeing != null) {
       selectedBeing.getItem() match {
-        case Some(item : Item) => actionHandler.perform(new ItemAction(selectedBeing.entityId, Use(), item.entityId, new EntityLocation(selectedBeing.entityId)))
+        case Some(item : Item) => actionHandler.perform(new ItemAction(selectedBeing.entityId, Use(), item.entityId, new EntityLocation(selectedBeing)))
         case _ => println("No item to use!!!")
       }
     }

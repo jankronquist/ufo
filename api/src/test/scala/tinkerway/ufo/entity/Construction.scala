@@ -2,6 +2,7 @@ package tinkerway.ufo.entity
 
 
 import org.junit.Test
+import tinkerway.ufo.api.Entity
 
 object ConstructionTesting {
   def main(args: Array[String]) {
