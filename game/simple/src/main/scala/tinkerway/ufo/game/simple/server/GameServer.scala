@@ -8,6 +8,7 @@ import tinkerway.ufo.game.simple.domain.Domain.{Gun, HealingPotion, HumanBeing}
 import tinkerway.ufo.domain.{HasLocation, HasPosition}
 import tinkerway.ufo.io.XStreamServerConnector
 import tinkerway.ufo.client.common.{EntityTypeContainer, SimpleClient, ClientEntity, FunctionEntityTypeContainer}
+import tinkerway.ufo.entity.EntityContainer
 
 trait ServerHealingPotion extends HealingPotion with Usable {
   def use(user : ServerBeing, location : Location) = {
@@ -15,24 +16,30 @@ trait ServerHealingPotion extends HealingPotion with Usable {
   }
 }
 
-trait ServerGun extends Gun with Usable {
-  def findPosition(location : Location) : Position = {
-    location match {
-      case PositionLocation(pos) => pos
-      case EntityLocation(entity) => entity match {
-        case e : HasPosition =>  e.position()
-        case e : HasLocation => findPosition(e.location())
-        case _ => throw new IllegalStateException("failed to find position!")
+trait ServerComponent {
+  this : ServerSPI =>
+
+  trait ServerGun extends Gun with Usable {
+    def findPosition(location : Location) : Position = {
+      location match {
+        case PositionLocation(pos) => pos
+        case EntityLocation(entity) => entity match {
+          case e : HasPosition =>  e.position()
+          case e : HasLocation => findPosition(e.location())
+          case _ => throw new IllegalStateException("failed to find position!")
+        }
       }
     }
-  }
-  def use(user : ServerBeing, location : Location) = {
-    println("Fire weapon, target=" + findPosition(location))
+    def use(user : ServerBeing, location : Location) = {
+      val target = findPosition(location)
+      println("Fire weapon, target=" + target)
+      sendToAll(EffectEvent(LinearEffect(EffectTypeId(1), user.position(), target)))
+    }
   }
 }
 
-trait MyScenarioHandler extends ScenarioHandler {
-  this : Server =>
+trait MyScenarioHandler extends ScenarioHandler with ServerComponent {
+  this : ServerSPI with ServerConnector with EntityContainer =>
 
   val entityTypes = new FunctionEntityTypeContainer
   entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with HumanBeing)

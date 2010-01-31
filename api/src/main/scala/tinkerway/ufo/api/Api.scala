@@ -40,6 +40,8 @@ case class TileTypeId(id:Long)
 
 case class EntityTypeId(id:Long)
 
+case class EffectTypeId(id:Long)
+
 case class ClientId(id:Long)
 
 case class EntityId(id:Long)
@@ -54,6 +56,10 @@ case class EntityLocation(entity : Entity) extends Location
 
 case class PositionLocation(position : Position) extends Location
 
+abstract class Effect
+
+case class LinearEffect(effectTypeId : EffectTypeId, from : Position, to : Position) extends Effect
+
 // EVENTS
 
 case class ConnectEvent(clientId : ClientId, world : WorldDescription) extends Event
@@ -65,6 +71,8 @@ case class RemoveEntity(entityId : EntityId) extends Event
 case class PropertyChangeEvent(entityId : EntityId, property : PropertyValue) extends Event
 
 case class BeginTurn(clientId : ClientId) extends Event
+
+case class EffectEvent(effect : Effect) extends Event
 
 // TODO: client names, teams
 

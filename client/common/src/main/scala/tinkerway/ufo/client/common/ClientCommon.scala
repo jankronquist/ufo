@@ -87,6 +87,8 @@ class SimpleClient(entityTypeContainer : EntityTypeContainer) extends EventListe
     case BeginTurn(clientId)  => {
       currentClient  = clientId
     }
+
+    case _ =>
   }
 
 

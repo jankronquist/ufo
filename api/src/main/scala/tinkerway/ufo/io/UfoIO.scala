@@ -89,8 +89,8 @@ class EntityXStream(entityContainer : EntityContainer) extends XStream(new Jetti
   }
 }
 
-class XStreamServerConnector(connector : ServerConnector) extends ServerConnector {
-  val serverXStream = new EntityXStream(connector.asInstanceOf[EntityContainer])
+class XStreamServerConnector(connector : ServerConnector with EntityContainer) extends ServerConnector {
+  val serverXStream = new EntityXStream(connector)
 
   def connect(name : String, eventListener : EventListener) : ActionHandler = {
     val clientXStream = new EntityXStream(eventListener.asInstanceOf[EntityContainer])

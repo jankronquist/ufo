@@ -143,7 +143,13 @@ trait ServerState {
   def perform(client : Client, action : Action) : ActionResult
 }
 
-class Server(val world : World) extends ServerEntityContainer with ServerConnector {
+trait ServerSPI {
+  def beginGame() : Unit
+  def addEntity(entity : ServerEntity) : Unit
+  def sendToAll(event : Event) : Unit
+}
+
+class Server(val world : World) extends ServerEntityContainer with ServerConnector with ServerSPI {
   scenarioHandler : ScenarioHandler =>
   
   var clients : List[Client] = Nil
