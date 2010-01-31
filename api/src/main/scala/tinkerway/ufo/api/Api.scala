@@ -17,7 +17,7 @@ trait EventListener {
 }
 
 trait ServerConnector {
-  def connect(eventListener : EventListener) : ActionHandler
+  def connect(name : String, eventListener : EventListener) : ActionHandler
 }
 
 case class Size(x:Int, y:Int)

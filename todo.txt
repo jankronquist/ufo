@@ -3,6 +3,7 @@ TODO:
 * Some simple Weapon (to be able to receive events for firing)
 * Enemy, controlled by "AI" player (to test end turn and different players connecting)
 * Inventory on server (remove entity)
+* Should Client by an Entity?
 * Properties should not have constructor arguments
 
 DONE:

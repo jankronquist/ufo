@@ -9,7 +9,7 @@ import com.thoughtworks.xstream.io.{HierarchicalStreamReader, HierarchicalStream
 import tinkerway.ufo.entity.EntityContainer
 import tinkerway.ufo.api._
 
-
+/*
 class SerializingServerConnector(connector : ServerConnector) extends ServerConnector {
   private def makeSerialized[T](obj : T) = {
     val byteOut = new ByteArrayOutputStream()
@@ -35,6 +35,7 @@ class SerializingServerConnector(connector : ServerConnector) extends ServerConn
     new SerializingActionHandler(connector.connect(new SerializingEventListener(eventListener)))
   }
 }
+*/
 
 class EntityConverter(entityContainer : EntityContainer) extends SingleValueConverter {
   def canConvert(clazz : java.lang.Class[_]) = {
@@ -91,16 +92,16 @@ class EntityXStream(entityContainer : EntityContainer) extends XStream(new Jetti
 class XStreamServerConnector(connector : ServerConnector) extends ServerConnector {
   val serverXStream = new EntityXStream(connector.asInstanceOf[EntityContainer])
 
-  def connect(eventListener : EventListener) : ActionHandler = {
+  def connect(name : String, eventListener : EventListener) : ActionHandler = {
     val clientXStream = new EntityXStream(eventListener.asInstanceOf[EntityContainer])
     def server2client[T](o : T) = {
       val payload = serverXStream.toXML(o)
-      println("server2client: " + payload)
+      //println("server2client: " + payload)
       clientXStream.fromXML(payload).asInstanceOf[T]
     }
     def client2server[T](o : T) = {
       val payload = clientXStream.toXML(o)
-      println("client2server: " + payload)
+      //println("client2server: " + payload)
       serverXStream.fromXML(payload).asInstanceOf[T]
     }
     class InnerEventListener extends EventListener {
@@ -113,6 +114,6 @@ class XStreamServerConnector(connector : ServerConnector) extends ServerConnecto
         server2client(actionHandler.perform(client2server(action)))
       }
     }
-    new InnerActionHandler(connector.connect(new InnerEventListener()))
+    new InnerActionHandler(connector.connect(name, new InnerEventListener()))
   }
 }

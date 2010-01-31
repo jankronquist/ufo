@@ -1,11 +1,10 @@
 package tinkerway.ufo.server
 
-import collection.mutable.HashMap
 import tinkerway.ufo.entity._
 import tinkerway.ufo.api._
 import tinkerway.ufo.domain.{Alive, Item, Being, HasPosition}
 
-class Client(val clientId : ClientId, val eventListener : EventListener) {
+class Client(val clientId : ClientId, val name : String, val eventListener : EventListener) {
   
 }
 
@@ -135,23 +134,46 @@ class Turn(clients : List[Client]) {
   }
 }
 
-class Server(world : World) extends ServerEntityContainer with ServerConnector {
+trait ScenarioHandler {
+  def beforeClientConnected(client : Client) : Unit
+  def afterClientConnected(client : Client) : Unit
+}
+
+trait ServerState {
+  def perform(client : Client, action : Action) : ActionResult
+}
+
+class Server(val world : World) extends ServerEntityContainer with ServerConnector {
+  scenarioHandler : ScenarioHandler =>
   
   var clients : List[Client] = Nil
   private var turn : Turn = null
+  var state : ServerState = new LobbyServerState()
 
   class ServerActionHandler(client : Client) extends ActionHandler {
     def perform(action : Action) : ActionResult =  {
+      state.perform(client, action)
+    }
+  }
+
+  class LobbyServerState extends ServerState {
+    def perform(client : Client, action : Action) : ActionResult =  {
       if (action.equals(BeginGame())) {
-        if (turn != null) {
-          IllegalAction()
-        } else {
-          newTurn()
-          Successful()
-        }
+        beginGame()
+        Successful()
+      } else {
+        IllegalAction()
+      }
+    }
+  }
+
+  class TurnBasedServerState extends ServerState {
+    def perform(client : Client, action : Action) : ActionResult =  {
+      if (action.equals(BeginGame())) {
+        IllegalAction()
       } else if (turn.isCurrentClient(client)) {
         try {
-          doPerform(action)
+          doPerform(client, action)
           Successful()
         } catch  {
           case ActionException(failure) => failure
@@ -160,8 +182,8 @@ class Server(world : World) extends ServerEntityContainer with ServerConnector {
         NotYourTurn()
       }
     }
-    
-    def doPerform(action : Action) = action match {
+
+    def doPerform(client : Client, action : Action) = action match {
       case EndTurn() => {
         nextClient()
       }
@@ -194,12 +216,20 @@ class Server(world : World) extends ServerEntityContainer with ServerConnector {
     }
   }
 
-  def connect(eventListener : EventListener) : ActionHandler = {
+  def connect(name : String, eventListener : EventListener) : ActionHandler = {
     val clientId = IdFactory.makeClientId()
     eventListener.receive(ConnectEvent(clientId, world.describe()))
-    val client = new Client(clientId, eventListener)
-    clients = client :: clients 
+    val client = new Client(clientId, name, eventListener)
+    scenarioHandler.beforeClientConnected(client)
+    clients = client :: clients
+    getAllEntities().foreach(e => eventListener.receive(makeNewEntityEvent(e)))
+    scenarioHandler.afterClientConnected(client)
     new ServerActionHandler(client)
+  }
+
+  def beginGame() = {
+    newTurn()
+    state = new TurnBasedServerState()
   }
 
   def newTurn() : Unit = {
@@ -234,9 +264,11 @@ class Server(world : World) extends ServerEntityContainer with ServerConnector {
 
   def addEntity(entity : ServerEntity) : Unit = {
     internalAddEntity(entity.entityId, entity)
-    sendToAll(NewEntityEvent(entity.entityId, entity.entityTypeId, entity.getAllPropertyValues()))
+    sendToAll(makeNewEntityEvent(entity))
     entity.addPropertyChangeListener(propertyChangeListener)
   }
+
+  def makeNewEntityEvent(entity : ServerEntity) = NewEntityEvent(entity.entityId, entity.entityTypeId, entity.getAllPropertyValues())
 
   def sendToAll(event : Event) = {
     clients.foreach(_.eventListener.receive(event))
@@ -254,8 +286,4 @@ trait ServerEntityContainer extends EntityContainer {
     findEntity(itemId).asInstanceOf[ServerItem]
   }
 
-}
-
-object App extends Application {
-  println("hello world")
 }

@@ -148,7 +148,7 @@ trait EntityContainer {
   def findEntity(entityId : EntityId) : EntityBase = {
     entities.get(entityId) match {
       case Some(entity) => entity
-      case None => throw new IllegalArgumentException("Entity does not exists")
+      case None => throw new IllegalArgumentException("Entity " + entityId + " does not exists")
     }
   }
 

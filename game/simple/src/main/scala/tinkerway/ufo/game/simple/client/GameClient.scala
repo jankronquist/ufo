@@ -94,7 +94,7 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
     entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with ClientHealingPotion)
     entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with ClientGun)
     client = new SimpleClient(entityTypes)
-    actionHandler = server.connect(client)
+    actionHandler = server.connect("Player", client)
 
     val hasLocation = new ClientEntity(EntityId(-1)) with ClientHealingPotion
 
@@ -114,7 +114,7 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
     
 
     startSignal.countDown()
-    actionHandler.perform(BeginGame())
+    // actionHandler.perform(BeginGame())
     gc.setVSync(true)
   }
 

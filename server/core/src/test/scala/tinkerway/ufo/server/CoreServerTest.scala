@@ -18,14 +18,23 @@ trait Human extends Being with AbstractEntity  {
 
 trait ClientHuman extends Human
 
+trait DummyScenarioHandler extends ScenarioHandler {
+  def beforeClientConnected(client : Client) : Unit = {
+    
+  }
+  def afterClientConnected(client : Client) : Unit = {
+
+  }
+}
+
 class CoreServerTest {
   val width = 5
   val height = 5
-  val server = new Server(new World(Size(width, height)))
+  val server = new Server(new World(Size(width, height))) with DummyScenarioHandler
   val entityTypes = new FunctionEntityTypeContainer
   entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with ClientHuman)
   val client = new SimpleClient(entityTypes)
-  val actionHandler = new XStreamServerConnector(server).connect(client)
+  val actionHandler = new XStreamServerConnector(server).connect("Test", client)
   
   @Before
   def before() = {
