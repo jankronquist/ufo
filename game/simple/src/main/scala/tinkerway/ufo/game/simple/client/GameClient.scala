@@ -197,8 +197,8 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
 
   override def render(gc: GameContainer, g: Graphics) = {
     client.getAllEntities().foreach(e  => {
-      if (e.entity.isInstanceOf[Sprite]) {
-        val sprite = e.entity.asInstanceOf[Sprite]
+      if (e.isInstanceOf[Sprite]) {
+        val sprite = e.asInstanceOf[Sprite]
         sprite.render(gc, g)
       }
     })
