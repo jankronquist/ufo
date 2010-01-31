@@ -167,7 +167,7 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
     if (selectedBeing != null) {
       val pos = selectedBeing.asInstanceOf[HasPosition].position()
       val dest = Position(pos.x+xdiff, pos.y+ydiff)
-      actionHandler.perform(new Move(selectedBeing.entityId, dest))
+      actionHandler.perform(new Move(selectedBeing, dest))
     }
   }
   def pickUpItem(xdiff : Int, ydiff : Int) = {
@@ -175,7 +175,7 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
       val pos = selectedBeing.asInstanceOf[HasPosition].position()
       val targetPosition = Position(pos.x+xdiff, pos.y+ydiff)
       client.findEntity(targetPosition) match {
-        case Some(item : Item) => actionHandler.perform(new ItemAction(selectedBeing.entityId, Place(), item.entityId, new PositionLocation(targetPosition)))
+        case Some(item : Item) => actionHandler.perform(new ItemAction(selectedBeing, Place(), item, new PositionLocation(targetPosition)))
         case _ => println("No item to pick up!")
       }
     }
@@ -185,7 +185,7 @@ class SimpleClientUI(startSignal : CountDownLatch, server : ServerConnector) ext
   def useItem() = {
     if (selectedBeing != null) {
       selectedBeing.getItem() match {
-        case Some(item : Item) => actionHandler.perform(new ItemAction(selectedBeing.entityId, Use(), item.entityId, new EntityLocation(selectedBeing)))
+        case Some(item : Item) => actionHandler.perform(new ItemAction(selectedBeing, Use(), item, new EntityLocation(selectedBeing)))
         case _ => println("No item to use!!!")
       }
     }

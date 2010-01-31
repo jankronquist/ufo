@@ -2,11 +2,11 @@
 TODO:
 * Some simple Weapon (to be able to receive events for firing)
 * Enemy, controlled by "AI" player (to test end turn and different players connecting)
-* API to include Entity references instead of ID:s and then transform to ID:s on the wire
 * Inventory on server (remove entity)
 * Properties should not have constructor arguments
 
 DONE:
+* API to include Entity references instead of ID:s and then transform to ID:s on the wire
 * Action points
 * Use item
 * Inventory on client

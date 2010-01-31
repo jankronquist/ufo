@@ -77,9 +77,9 @@ case class Use() extends ItemActionType
 
 case class EndTurn() extends Action
 
-case class Move(beingId : EntityId, position : Position) extends Action
+case class Move(being : Entity, position : Position) extends Action
 
-case class ItemAction(beingId : EntityId, action : ItemActionType, itemId : EntityId, location : Location) extends Action
+case class ItemAction(being : Entity, action : ItemActionType, itemI : Entity, location : Location) extends Action
 
 case class BeginGame() extends Action
 

@@ -165,8 +165,8 @@ class Server(world : World) extends ServerEntityContainer with ServerConnector {
       case EndTurn() => {
         nextClient()
       }
-      case Move(beingId, position) => {
-        val being = findBeingToPerformAction(beingId)
+      case Move(being : ServerBeing, position) => {
+        being.assertControlledBy(client)
         if (being.actionPoints() < 1) {
           throw new ActionException(NotEnoughActionPoints())
         }
@@ -183,26 +183,14 @@ class Server(world : World) extends ServerEntityContainer with ServerConnector {
         // TODO: better way to handle action points
         being.actionPoints := being.actionPoints() - 1
       }
-      case ItemAction(beingId, action, itemId, location) => {
-        val being = findBeingToPerformAction(beingId)
+      case ItemAction(being : ServerBeing, action, item : ServerItem, location) => {
+        being.assertControlledBy(client)
         if (being.actionPoints() < 1) {
           throw new ActionException(NotEnoughActionPoints())
         }
-        being.performItemAction(action, findItem(itemId), location)
+        being.performItemAction(action, item, location)
         being.actionPoints := being.actionPoints() - 1
       }
-    }
-
-    def findBeingToPerformAction(beingId : EntityId) : ServerBeing = {
-      val being = findBeingControlledByClient(beingId)
-      being.assertCanPerformAction()
-      being
-    }
-
-    def findBeingControlledByClient(beingId : EntityId) : ServerBeing = {
-      val being = findBeing(beingId)
-      being.assertControlledBy(client)
-      being
     }
   }
 

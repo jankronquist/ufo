@@ -8,6 +8,7 @@ import org.junit.Assert._
 import org.junit.{Ignore, Test, Before}
 import scala.collection.mutable.HashMap
 import tinkerway.ufo.domain.{Being, HasPosition}
+import tinkerway.ufo.io.XStreamServerConnector
 
 trait Human extends Being with AbstractEntity  {
   val entityTypeId = EntityTypeId(1)
@@ -24,7 +25,7 @@ class CoreServerTest {
   val entityTypes = new FunctionEntityTypeContainer
   entityTypes.registerEntityType((entityId :EntityId) => new ClientEntity(entityId) with ClientHuman)
   val client = new SimpleClient(entityTypes)
-  val actionHandler = server.connect(client)
+  val actionHandler = new XStreamServerConnector(server).connect(client)
   
   @Before
   def before() = {
@@ -38,20 +39,20 @@ class CoreServerTest {
 
   @Test
   def whenAddingAnEntitySendNewEntityEvent() = {
-    val being1 = IdFactory.makeEntityId()
-    server.addEntity(new ServerBeing(being1, Position(1, 1), server.getClient(client.clientId)) with Human)
-    assertTrue(client.findEntity(being1) != null)
+    val beingId1 = IdFactory.makeEntityId()
+    server.addEntity(new ServerBeing(beingId1, Position(1, 1), server.getClient(client.clientId)) with Human)
+    assertTrue(client.findEntity(beingId1) != null)
   }
 
   @Test
   def whenMovingThePositionShouldChangeOnTheClient() = {
-    val being1 = IdFactory.makeEntityId()
-    val serverBeing = new ServerBeing(being1, Position(1, 1), server.getClient(client.clientId)) with Human
+    val beingId1 = IdFactory.makeEntityId()
+    val serverBeing = new ServerBeing(beingId1, Position(1, 1), server.getClient(client.clientId)) with Human
     server.addEntity(serverBeing)
 
     val targetPosition = Position(1, 2)
-    performSuccessful(Move(being1, targetPosition))
-    val clientPosition = client.findEntity(being1).asInstanceOf[HasPosition].position()
+    performSuccessful(Move(serverBeing, targetPosition))
+    val clientPosition = client.findEntity(beingId1).asInstanceOf[HasPosition].position()
     assertEquals(targetPosition, clientPosition)
   }
 
@@ -71,42 +72,45 @@ class CoreServerTest {
   @Test
   def movingMultipleStepsShouldNotBePossible() = {
     val being1 = IdFactory.makeEntityId()
-    server.addEntity(new ServerBeing(being1, Position(2, 2), server.getClient(client.clientId)) with Human)
+    val being = new ServerBeing(being1, Position(2, 2), server.getClient(client.clientId)) with Human
+    server.addEntity(being)
 
-    unsuccessful(Move(being1, Position(3, 3)))
-    unsuccessful(Move(being1, Position(1, 1)))
-    unsuccessful(Move(being1, Position(2, 4)))
-    unsuccessful(Move(being1, Position(0, 2)))
+    unsuccessful(Move(being, Position(3, 3)))
+    unsuccessful(Move(being, Position(1, 1)))
+    unsuccessful(Move(being, Position(2, 4)))
+    unsuccessful(Move(being, Position(0, 2)))
   }
   
   @Test
   def passingThroughEntityShouldNotBePossible() = {
-    val being1 = IdFactory.makeEntityId()
-    val being2 = IdFactory.makeEntityId()
-    server.addEntity(new ServerBeing(being1, Position(2, 2), server.getClient(client.clientId)) with Human)
-    server.addEntity(new ServerBeing(being2, Position(2, 3), server.getClient(client.clientId)) with Human)
+    val beingId1 = IdFactory.makeEntityId()
+    val beingId2 = IdFactory.makeEntityId()
+    val being1 = new ServerBeing(beingId1, Position(2, 2), server.getClient(client.clientId)) with Human
+    val being2 = new ServerBeing(beingId2, Position(2, 3), server.getClient(client.clientId)) with Human
+    server.addEntity(being1)
+    server.addEntity(being2)
 
     unsuccessful(Move(being1, Position(2, 3)))
   }
 
   @Test
   def atTopLeftMovingLeftOrUpShouldNotBePossible() = {
-    val being1 = IdFactory.makeEntityId()
-    val serverBeing = new ServerBeing(being1, Position(0, 0), server.getClient(client.clientId)) with Human
+    val beingId1 = IdFactory.makeEntityId()
+    val serverBeing = new ServerBeing(beingId1, Position(0, 0), server.getClient(client.clientId)) with Human
     server.addEntity(serverBeing)
 
-    unsuccessful(Move(being1, Position(-1, 0)))
-    unsuccessful(Move(being1, Position(0, -1)))
+    unsuccessful(Move(serverBeing, Position(-1, 0)))
+    unsuccessful(Move(serverBeing, Position(0, -1)))
   }
   
   @Test
   def atBottomRightMovingRightOrDownShouldNotBePossible() = {
-    val being1 = IdFactory.makeEntityId()
-    val serverBeing = new ServerBeing(being1, Position(width-1, height-1), server.getClient(client.clientId)) with Human
+    val beingId1 = IdFactory.makeEntityId()
+    val serverBeing = new ServerBeing(beingId1, Position(width-1, height-1), server.getClient(client.clientId)) with Human
     server.addEntity(serverBeing)
 
-    unsuccessful(Move(being1, Position(-1, 0)))
-    unsuccessful(Move(being1, Position(0, -1)))
+    unsuccessful(Move(serverBeing, Position(-1, 0)))
+    unsuccessful(Move(serverBeing, Position(0, -1)))
   }
   
   private def performSuccessful(action : Action) = {
