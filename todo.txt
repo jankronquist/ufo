@@ -14,3 +14,4 @@ DONE:
 * Entity ska ha id
 * Pick up items
 * Controlledby Šr en property
+
